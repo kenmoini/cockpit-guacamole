@@ -7,6 +7,8 @@ A [Cockpit](https://cockpit-project.org/) plugin that provides browser-based rem
 
 No external proxy or Guacamole server infrastructure required -- the plugin talks directly to `guacd` through Cockpit's built-in channel API.
 
+![Remote Desktop View of a RHEL 9 system via Cockpit Remote Desktop](screenshot.jpg)
+
 ## Features
 
 - **In-browser remote desktop** -- RDP sessions rendered directly in the Cockpit UI
@@ -34,7 +36,7 @@ The plugin opens a raw TCP channel to `guacd` via Cockpit's bridge and performs 
 ## Prerequisites
 
 - **Cockpit** installed and running
-- **Fedora / RHEL / CentOS** (or any distro with PackageKit and systemd)
+- **Fedora / RHEL / CentOS** (or any distro with PackageKit and systemd).  If running on RHEL you must enable the CodeReady Builder and EPEL repos to get guacd and xrdp.
 - NodeJS/NPM installed for building from this repo - Deb/RPM packages to come soon
 - A Desktop Environment like GNOME `dnf install @gnome-desktop`
 - `guacd`, `xrdp`, and `libguac-client-rdp` can be installed through the Cockpit Remote Desktop UI if not already present.
@@ -75,3 +77,14 @@ npm run watch
 | Build       | esbuild + esbuild-sass-plugin       |
 | System APIs | Cockpit JS bridge (spawn, dbus, file, channel) |
 
+## Tested Platforms
+
+- Fedora 40, 41, 42
+- RHEL 9
+
+## Common Problems
+
+- **When logging in, it immediately disconnects.**
+  This is likely due to a lack of a desktop environment.  Install GNOME or another DE.
+- **When connecting the screen tears and jitters.**
+  This is due to a stale session lock.  Run `pkill Xvnc` to release the session.
