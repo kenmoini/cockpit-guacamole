@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Remote Desktop</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="index.css">
+    <link rel="icon" href="../../static/favicon.ico" />
+    <link href="../../static/branding.css" rel="stylesheet" />
+    <script src="../base1/cockpit.js"></script>
+</head>
+<body class="pf-v6-m-tabular-nums">
+    <div class="ct-page-fill" id="app">
+      <div id="remote-desktop" class="pf-v6-c-page no-masthead-sidebar">
+        <div id="main-container" class="pf-v6-c-page__main-container">
+          <main class="pf-v6-c-page__main">
+            <section class="pf-v6-c-page__main-section pf-m-shadow-bottom">
+              <div id="toolbar">
+                  <h2>Remote Desktop</h2>
+                  <div id="service-status">
+                      <div class="service-control">
+                        <button id="guacd-toggle" class="pf-v6-c-button pf-m-stateful pf-m-read hidden" disabled>
+                            <span id="guacd-status" class="status-indicator">guacd: checking...</span>
+                            <i id="guacd-toggle-icon" class="fa-solid fa-play" aria-hidden="true"></i>
+                        </button>
+                        <button id="guacd-install" class="btn-small btn-install hidden">Install guacd</button>
+                      </div>
+                      <div class="service-control">
+                          <button id="xrdp-toggle" class="pf-v6-c-button pf-m-stateful pf-m-read hidden" disabled>
+                            <span id="xrdp-status" class="status-indicator">xrdp: checking...</span>
+                            <i id="xrdp-toggle-icon" class="fa-solid fa-play" aria-hidden="true"></i>
+                          </button>
+                          <button id="xrdp-install" class="btn-small btn-install hidden">Install xrdp</button>
+                      </div>
+                      <button id="configure-btn" class="pf-v6-c-button pf-m-control pf-m-settings" type="button" title="Configure">
+                        <span class="pf-v6-c-button__icon pf-m-end">
+                          <i class="fa-solid fa-gear" aria-hidden="true"></i>
+                        </span>
+                      </button>
+                  </div>
+              </div>
+            </section>
+            <section class="pf-v6-c-page__main-section pf-m-no-padding pf-m-fill">
+
+              <div id="connection-panel">
+                  <div id="connection-form">
+                      <h3>Connect to Local Desktop</h3>
+                      <div class="form-group">
+                          <label for="username">Username</label>
+                          <input type="text" id="username" autocomplete="username" />
+                      </div>
+                      <div class="form-group">
+                          <label for="password">Password</label>
+                          <input type="password" id="password" autocomplete="current-password" />
+                      </div>
+                      <div class="form-group">
+                          <label for="port">RDP Port</label>
+                          <input type="number" id="port" value="3389" />
+                      </div>
+                      <div class="form-actions">
+                          <button id="connect-btn" class="btn-primary">Connect</button>
+                      </div>
+                      <div id="error-message" class="error hidden"></div>
+                  </div>
+              </div>
+
+              <div id="display-wrapper" class="hidden">
+                  <div id="display-toolbar">
+                      <button id="disconnect-btn" class="btn-secondary">Disconnect</button>
+                      <button id="paste-btn" class="btn-secondary">Paste</button>
+                      <button id="fullscreen-btn" class="btn-secondary">Fullscreen</button>
+                  </div>
+                  <div id="display-container" tabindex="0"></div>
+              </div>
+          </div>
+          <div id="paste-dialog" class="dialog-overlay hidden">
+              <div class="dialog-box">
+                  <div class="dialog-header">
+                      <h3>Paste Text</h3>
+                  </div>
+                  <div class="dialog-body">
+                      <p>Enter or paste text to send to the remote desktop.</p>
+                      <textarea id="paste-text" rows="6" placeholder="Paste or type text here..."></textarea>
+                  </div>
+                  <div class="dialog-footer paste-dialog-footer">
+                      <button id="paste-dialog-cancel" class="btn-secondary">Cancel</button>
+                      <button id="paste-dialog-send" class="btn-primary btn-dialog-primary">Send</button>
+                  </div>
+              </div>
+          </div>
+          <div id="install-dialog" class="dialog-overlay hidden">
+              <div class="dialog-box">
+                  <div class="dialog-header">
+                      <h3 id="install-dialog-title">Installing package</h3>
+                  </div>
+                  <div class="dialog-body">
+                      <p id="install-dialog-message">Preparing...</p>
+                      <div id="install-progress-bar-wrap" class="progress-bar-wrap">
+                          <div id="install-progress-bar" class="progress-bar"></div>
+                      </div>
+                      <p id="install-dialog-error" class="error hidden"></p>
+                  </div>
+                  <div class="dialog-footer">
+                      <button id="install-dialog-close" class="btn-secondary hidden">Close</button>
+                  </div>
+              </div>
+          </div>
+          <div id="configure-dialog" class="dialog-overlay hidden">
+              <div class="dialog-box dialog-box-wide">
+                  <div class="dialog-header">
+                      <h3>Configure Remote Desktop</h3>
+                  </div>
+                  <div class="dialog-body">
+                      <div id="configure-loading" class="configure-loading">Loading current settings...</div>
+                      <div id="configure-content" class="hidden">
+                          <div class="config-section">
+                              <h4>Enable Services at Boot</h4>
+                              <div class="config-row">
+                                  <label class="config-label">
+                                      <input type="checkbox" id="config-xrdp-enabled" />
+                                      Enable xrdp at boot
+                                  </label>
+                                  <span id="config-xrdp-enabled-status" class="config-status"></span>
+                              </div>
+                              <div class="config-row">
+                                  <label class="config-label">
+                                      <input type="checkbox" id="config-guacd-enabled" />
+                                      Enable guacd at boot
+                                  </label>
+                                  <span id="config-guacd-enabled-status" class="config-status"></span>
+                              </div>
+                          </div>
+                          <div class="config-section">
+                              <h4>GPU Access for Current User</h4>
+                              <p class="config-description">
+                                  Add user <strong id="config-username-display"></strong>
+                                  to <code>render</code> and <code>video</code> groups for
+                                  hardware-accelerated rendering. Requires logout/login to take effect.
+                              </p>
+                              <div class="config-row">
+                                  <span id="config-groups-current" class="config-info"></span>
+                                  <button id="config-add-groups" class="btn-small btn-install">Add to Groups</button>
+                                  <span id="config-groups-status" class="config-status"></span>
+                              </div>
+                          </div>
+                          <div class="config-section">
+                              <h4>Session Disconnection Timeout</h4>
+                              <p class="config-description">
+                                  Automatically terminate Xvnc sessions after being disconnected
+                                  for this many seconds. Set to 0 to disable. Applied in
+                                  <code>/etc/xrdp/sesman.ini</code> under <code>[Xvnc]</code>.
+                              </p>
+                              <div class="config-row">
+                                  <label class="config-label" for="config-max-disconnect-time">
+                                      Seconds:
+                                  </label>
+                                  <input type="number" id="config-max-disconnect-time"
+                                        min="0" step="1" value="0"
+                                        class="config-input-number" />
+                                  <span id="config-disconnect-status" class="config-status"></span>
+                              </div>
+                          </div>
+                          <p id="configure-error" class="error hidden"></p>
+                      </div>
+                  </div>
+                  <div class="dialog-footer config-dialog-footer">
+                      <button id="configure-cancel" class="btn-secondary">Cancel</button>
+                      <button id="configure-apply" class="btn-primary btn-dialog-primary">Apply</button>
+                  </div>
+              </div>
+            </section>
+          </main>
+        </div> <!-- #main-container -->
+      </div> <!-- #remote-desktop -->
+    </div> <!-- #app -->
+    <script src="index.js"></script>
+</body>
+</html>

@@ -1,0 +1,505 @@
+@use "./lib/global-variables" as *;
+@use "@patternfly/patternfly/base";
+@use "@patternfly/patternfly/components/Page/page.css";
+@use "@patternfly/patternfly/utilities/Spacing/spacing.css";
+@use "@patternfly/patternfly/components/Menu/menu.css";
+@use "@patternfly/patternfly/components/Button/button.css";
+@use "@patternfly/patternfly/utilities/Text/text.css";
+@use './fontawesome/scss/variables' with (
+  // customizing $font-path - make sure it points to where your webfonts are stored in your project
+  $font-path: './fontawesome/webfonts'
+);
+@use "./fontawesome/scss/fontawesome";
+@use './fontawesome/scss/fa' as fa;
+@use './fontawesome/scss/solid' as fa-solid;
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "RedHatText", "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    background: var(--pf-t--global--background--color--secondary--default);
+    color: #151515;
+}
+:where(body) {
+    font-family: var(--pf-t--global--font--family--body);
+    font-size: var(--pf-t--global--font--size--body--default);
+    font-weight: var(--pf-t--global--font--weight--body--default);
+    line-height: var(--pf-t--global--font--line-height--body);
+    color: var(--pf-t--global--text--color--regular);
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+html:not(.index-page) body .ct-page-fill {
+    block-size: 100% !important;
+}
+
+#main-container {
+  grid-column-start: sidebar;
+  grid-row-start: sidebar;
+  height: 100%;
+}
+
+/* ── Toolbar ────────────────────────────────────────────────────── */
+
+#toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: #fff;
+    // border-bottom: 1px solid #d2d2d2;
+    flex-shrink: 0;
+}
+
+#toolbar h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+#service-status {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.service-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-indicator {
+    font-size: 13px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+}
+
+.status-active {
+    background: #e6f9e6;
+    color: #1e7e1e;
+}
+
+.status-inactive {
+    background: #fce8e8;
+    color: #c9190b;
+}
+
+.btn-small {
+    padding: 2px 10px;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background: #fff;
+    cursor: pointer;
+    color: #151515;
+}
+
+.btn-small:hover {
+    background: #f0f0f0;
+}
+
+.btn-small:disabled {
+    color: #6a6e73;
+    cursor: not-allowed;
+}
+
+/* ── Connection form ────────────────────────────────────────────── */
+
+#connection-panel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#connection-form {
+    width: 360px;
+    padding: 24px;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+#connection-form h3 {
+    margin: 0 0 20px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #06c;
+    box-shadow: 0 0 0 1px #06c;
+}
+
+.form-actions {
+    margin-top: 20px;
+}
+
+.btn-primary {
+    background: #06c;
+    color: #fff;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background: #004080;
+}
+
+.btn-primary:disabled {
+    background: #6a6e73;
+    cursor: not-allowed;
+}
+
+.error {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: #fce8e8;
+    color: #c9190b;
+    border-radius: 3px;
+    font-size: 13px;
+    border: 1px solid #c9190b;
+}
+
+/* ── Display area ───────────────────────────────────────────────── */
+
+#display-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+#display-toolbar {
+    display: flex;
+    gap: 8px;
+    padding: 6px 12px;
+    background: #212427;
+    flex-shrink: 0;
+}
+
+.btn-secondary {
+    background: #3c3f42;
+    color: #fff;
+    border: 1px solid #6a6e73;
+    padding: 4px 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.btn-secondary:hover {
+    background: #4f5255;
+}
+
+.btn-secondary:disabled {
+    color: #6a6e73;
+    cursor: not-allowed;
+}
+
+#display-container {
+    flex: 1;
+    overflow: hidden;
+    background: #000;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+}
+
+#display-container:focus {
+    outline: 2px solid #06c;
+    outline-offset: -2px;
+}
+
+/* ── Fullscreen ─────────────────────────────────────────────────── */
+
+#display-wrapper:fullscreen {
+    background: #000;
+}
+
+#display-wrapper:fullscreen #display-toolbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+#display-wrapper:fullscreen #display-toolbar:hover {
+    opacity: 1;
+}
+
+#display-wrapper:fullscreen #display-container {
+    height: 100vh;
+}
+
+/* ── Install button ─────────────────────────────────────────────── */
+
+.btn-install {
+    background: #06c;
+    color: #fff;
+    border-color: #06c;
+}
+
+.btn-install:hover {
+    background: #004080;
+    border-color: #004080;
+}
+
+.btn-install:disabled {
+    background: #6a6e73;
+    border-color: #6a6e73;
+    color: #fff;
+}
+
+/* ── Install dialog ─────────────────────────────────────────────── */
+
+.dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.dialog-box {
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    width: 440px;
+    max-width: 90vw;
+    overflow: hidden;
+}
+
+.dialog-header {
+    padding: 16px 20px 0;
+}
+
+.dialog-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.dialog-body {
+    padding: 12px 20px 16px;
+}
+
+.dialog-body p {
+    margin: 0 0 12px;
+    font-size: 14px;
+    color: #151515;
+}
+
+.progress-bar-wrap {
+    height: 8px;
+    background: #d2d2d2;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: #06c;
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.dialog-footer {
+    padding: 0 20px 16px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* ── Paste dialog ──────────────────────────────────────────────── */
+
+#paste-text {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 13px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+#paste-text:focus {
+    outline: none;
+    border-color: #06c;
+    box-shadow: 0 0 0 1px #06c;
+}
+
+.paste-dialog-footer {
+    gap: 8px;
+}
+
+.btn-dialog-primary {
+    padding: 6px 20px;
+    width: auto;
+}
+
+/* ── Configure button ──────────────────────────────────────────── */
+
+.btn-configure {
+    background: #fff;
+    border: 1px solid #06c;
+    color: #06c;
+}
+
+.btn-configure:hover {
+    background: #e7f1fa;
+}
+
+/* ── Configure dialog ─────────────────────────────────────────── */
+
+.dialog-box-wide {
+    width: 520px;
+}
+
+.configure-loading {
+    text-align: center;
+    padding: 20px 0;
+    color: #6a6e73;
+    font-size: 14px;
+}
+
+.config-section {
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #d2d2d2;
+}
+
+.config-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.config-section h4 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.config-description {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: #6a6e73;
+}
+
+.config-description code {
+    background: #f0f0f0;
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-size: 12px;
+}
+
+.config-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.config-row:last-child {
+    margin-bottom: 0;
+}
+
+.config-label {
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.config-input-number {
+    width: 100px;
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 14px;
+}
+
+.config-input-number:focus {
+    outline: none;
+    border-color: #06c;
+    box-shadow: 0 0 0 1px #06c;
+}
+
+.config-status {
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.config-status-ok {
+    color: #1e7e1e;
+}
+
+.config-status-err {
+    color: #c9190b;
+}
+
+.config-status-info {
+    color: #6a6e73;
+}
+
+.config-info {
+    font-size: 13px;
+    color: #6a6e73;
+}
+
+.config-dialog-footer {
+    gap: 8px;
+}
+
+/* ── Utility ────────────────────────────────────────────────────── */
+
+.hidden {
+    display: none !important;
+}

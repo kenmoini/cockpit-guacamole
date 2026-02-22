@@ -1,0 +1,11 @@
+{
+  "version": 0,
+  "tools": {
+    "remote-desktop": {
+      "label": "Remote Desktop",
+      "order": 100,
+      "path": "index.html"
+    }
+  },
+  "content-security-policy": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'"
+}

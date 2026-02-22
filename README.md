@@ -1,11 +1,11 @@
 # cockpit-guacamole
 
+![PatternFly 6](https://img.shields.io/badge/PatternFly-6-blue)
+![License](https://img.shields.io/badge/license-GNU--GPL--v3-blue)
+
 A [Cockpit](https://cockpit-project.org/) plugin that provides browser-based remote desktop access using [Apache Guacamole](https://guacamole.apache.org/) and [xrdp](http://xrdp.org/).
 
 No external proxy or Guacamole server infrastructure required -- the plugin talks directly to `guacd` through Cockpit's built-in channel API.
-
-![PatternFly 6](https://img.shields.io/badge/PatternFly-6-blue)
-![License](https://img.shields.io/badge/license-GNU--GPL--v3-blue)
 
 ## Features
 
@@ -44,7 +44,7 @@ The plugin opens a raw TCP channel to `guacd` via Cockpit's bridge and performs 
 
 ```bash
 # Clone and build
-git clone <repo-url>
+git clone https://github.com/kenmoini/cockpit-guacamole.git
 cd cockpit-guacamole
 npm install
 npm run build
