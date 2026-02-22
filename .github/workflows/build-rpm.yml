@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
 
       - name: Replace version in RPM spec so correct source is downloaded when building RPM
         run: sed -Ei 's/(^Version:[[:space:]]*).*/\1${{github.ref_name}}/' ${{ vars.PKG_NAME }}.spec
@@ -22,7 +22,7 @@ jobs:
         run: tar -cvf ${{ vars.PKG_NAME }}-${{ github.ref_name }}.tar.gz *
 
       - name: Upload source archive as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ vars.PKG_NAME }}-${{ github.ref_name }}.tar.gz
           path: ${{ vars.PKG_NAME }}-${{ github.ref_name }}.tar.gz
@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
 
       - name: Replace version in RPM spec so correct source is downloaded when building RPM
         run: sed -Ei 's/(^Version:[[:space:]]*).*/\1${{github.ref_name}}/' ${{ vars.PKG_NAME }}.spec
@@ -45,7 +45,7 @@ jobs:
           spec_file: ${{ vars.PKG_NAME }}.spec
 
       - name: Upload .rpm package as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ vars.PKG_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.rpm
           path: rpmbuild/RPMS/${{ env.ARCH }}/*.rpm
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download .rpm artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v7
         id: download
         with:
           name: ${{ vars.PKG_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.rpm
@@ -67,7 +67,7 @@ jobs:
           sudo alien -k --verbose --to-deb *.rpm
 
       - name: Upload .deb package as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ vars.PKG_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.deb
           path: ${{ vars.PKG_NAME }}*.deb
@@ -78,10 +78,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download cached rpm, deb, and tar.gz artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v7
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             ${{ vars.PKG_NAME }}-${{ github.ref_name }}.tar.gz/*.tar.gz
