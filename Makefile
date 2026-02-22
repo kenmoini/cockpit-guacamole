@@ -1,4 +1,7 @@
 PACKAGE_NAME = cockpit-guacamole
+RPM_NAME := $(PACKAGE_NAME)
+TARFILE=$(RPM_NAME).tar.xz
+SPEC=$(RPM_NAME).spec
 INSTALL_DIR = $(HOME)/.local/share/cockpit/$(PACKAGE_NAME)
 
 all: build

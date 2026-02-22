@@ -35,6 +35,7 @@ The plugin opens a raw TCP channel to `guacd` via Cockpit's bridge and performs 
 
 - **Cockpit** installed and running
 - **Fedora / RHEL / CentOS** (or any distro with PackageKit and systemd)
+- NodeJS/NPM installed for building from this repo - Deb/RPM packages to come soon
 - A Desktop Environment like GNOME `dnf install @gnome-desktop`
 - `guacd`, `xrdp`, and `libguac-client-rdp` can be installed through the Cockpit Remote Desktop UI if not already present.
 
