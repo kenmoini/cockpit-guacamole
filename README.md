@@ -88,3 +88,5 @@ npm run watch
   This is likely due to a lack of a desktop environment.  Install GNOME or another DE.
 - **When connecting the screen tears and jitters.**
   This is due to a stale session lock.  Run `pkill Xvnc` to release the session.
+- **The Xrdp service fails to load.**
+  This might be due to another RDP service (like GNOME Remote Desktop) running on the default port 3389 and so Xrdp cannot start and bind to that same port.  You can use the Configuration menu in the Remote Desktop plugin to reconfigure the port for Xrdp.
