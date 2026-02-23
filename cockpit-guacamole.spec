@@ -4,7 +4,7 @@ Release:        1%{?dist}
 Summary:        Cockpit plugin for browser-based remote desktop access
 
 License:        GPL-3.0-only
-URL:            https://github.com/kenmoini/cockpit-rdp
+URL:            https://github.com/kenmoini/cockpit-guacamole
 Source0:        %{name}-%{version}.tar.gz
 BuildArch:      noarch
 
