@@ -29,13 +29,7 @@ cp -rp . %{buildroot}%{_datadir}/cockpit/%{name}/
 
 %files
 %license LICENSE
-%{_datadir}/cockpit/%{name}/manifest.json
-%{_datadir}/cockpit/%{name}/index.html
-%{_datadir}/cockpit/%{name}/index.js
-%{_datadir}/cockpit/%{name}/index.css
-%dir %{_datadir}/cockpit/%{name}/fontawesome
-%dir %{_datadir}/cockpit/%{name}/fontawesome/webfonts
-%{_datadir}/cockpit/%{name}/fontawesome/webfonts/*.woff2
+%{_datadir}/cockpit/%{name}/
 
 %changelog
 * Sun Feb 22 2026 Ken Moini - 0.1.0-1

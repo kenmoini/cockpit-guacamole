@@ -57,20 +57,23 @@ jobs:
         with:
           name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}.tar.gz
 
+      - name: Install rpmbuild
+        run: sudo apt-get update && sudo apt-get install -y rpm
+
       - name: Replace version in RPM spec
         run: sed -Ei 's/(^Version:[[:space:]]*).*/\1${{ github.ref_name }}/' ${{ env.PACKAGE_NAME }}.spec
 
-      - name: Run rpmbuild on RPM spec to produce package
-        id: rpm
-        uses: naveenrajm7/rpmbuild@master
-        with:
-          spec_file: ${{ env.PACKAGE_NAME }}.spec
+      - name: Build RPM
+        run: |
+          mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+          cp ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}.tar.gz ~/rpmbuild/SOURCES/
+          rpmbuild -ba ${{ env.PACKAGE_NAME }}.spec
 
       - name: Upload .rpm package as artifact
         uses: actions/upload-artifact@v6
         with:
           name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.rpm
-          path: rpmbuild/RPMS/${{ env.ARCH }}/*.rpm
+          path: ~/rpmbuild/RPMS/${{ env.ARCH }}/*.rpm
 
   build_deb:
     name: Build .deb package
