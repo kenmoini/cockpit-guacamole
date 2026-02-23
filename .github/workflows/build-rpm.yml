@@ -3,8 +3,12 @@ on:
   push:
     tags:
       - "*.*.*"
+
+  workflow_dispatch:
+
 env:
-  DIST: el7
+  PACKAGE_NAME: cockpit-guacamole
+  DIST: el9
   ARCH: noarch
 
 jobs:
@@ -15,17 +19,31 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Replace version in RPM spec so correct source is downloaded when building RPM
-        run: sed -Ei 's/(^Version:[[:space:]]*).*/\1${{github.ref_name}}/' ${{ vars.PKG_NAME }}.spec
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v6.2.0
+        with:
+          node-version: 22.x
+
+      - name: Build plugin
+        env:
+          NODE_ENV: production
+        run: |
+          npm ci
+          npm run build
 
       - name: Create source archive
-        run: tar -cvf ${{ vars.PKG_NAME }}-${{ github.ref_name }}.tar.gz *
+        run: |
+          mkdir ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}
+          cp -r dist/* ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}/
+          cp LICENSE ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}/
+          rm -f ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}/*.map
+          tar -czvf ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}.tar.gz ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}
 
       - name: Upload source archive as artifact
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ vars.PKG_NAME }}-${{ github.ref_name }}.tar.gz
-          path: ${{ vars.PKG_NAME }}-${{ github.ref_name }}.tar.gz
+          name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}.tar.gz
+          path: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}.tar.gz
 
   build_rpm:
     name: Build .rpm package
@@ -35,19 +53,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Replace version in RPM spec so correct source is downloaded when building RPM
-        run: sed -Ei 's/(^Version:[[:space:]]*).*/\1${{github.ref_name}}/' ${{ vars.PKG_NAME }}.spec
+      - name: Download source archive
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}.tar.gz
+
+      - name: Replace version in RPM spec
+        run: sed -Ei 's/(^Version:[[:space:]]*).*/\1${{ github.ref_name }}/' ${{ env.PACKAGE_NAME }}.spec
 
       - name: Run rpmbuild on RPM spec to produce package
         id: rpm
         uses: naveenrajm7/rpmbuild@master
         with:
-          spec_file: ${{ vars.PKG_NAME }}.spec
+          spec_file: ${{ env.PACKAGE_NAME }}.spec
 
       - name: Upload .rpm package as artifact
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ vars.PKG_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.rpm
+          name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.rpm
           path: rpmbuild/RPMS/${{ env.ARCH }}/*.rpm
 
   build_deb:
@@ -59,7 +82,7 @@ jobs:
         uses: actions/download-artifact@v7
         id: download
         with:
-          name: ${{ vars.PKG_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.rpm
+          name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.rpm
 
       - name: Convert .rpm to .deb
         run: |
@@ -69,8 +92,8 @@ jobs:
       - name: Upload .deb package as artifact
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ vars.PKG_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.deb
-          path: ${{ vars.PKG_NAME }}*.deb
+          name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.deb
+          path: ${{ env.PACKAGE_NAME }}*.deb
 
   release:
     name: Create release with all assets
@@ -84,6 +107,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            ${{ vars.PKG_NAME }}-${{ github.ref_name }}.tar.gz/*.tar.gz
-            ${{ vars.PKG_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.rpm/**/*.rpm
-            ${{ vars.PKG_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.deb/**/*.deb
+            ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}.tar.gz/*.tar.gz
+            ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.rpm/**/*.rpm
+            ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.deb/**/*.deb

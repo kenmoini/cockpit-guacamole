@@ -1,37 +1,42 @@
 Name:           cockpit-guacamole
 Version:        0.1.0
 Release:        1%{?dist}
-Summary:        provii is a portable binary cli tool downloader
+Summary:        Cockpit plugin for browser-based remote desktop access
 
-License:        GPLv3
-URL:            https://github.com/kenmoini/cockpit-guacamole
-Source:         %{name}-%{version}.tar.gz
+License:        GPL-3.0-only
+URL:            https://github.com/kenmoini/cockpit-rdp
+Source0:        %{name}-%{version}.tar.gz
 BuildArch:      noarch
 
-Requires:       cockpit, cockpit-bridge
+Requires:       cockpit
+Requires:       cockpit-bridge
 
 %description
-A Cockpit plugin that provides browser-based remote desktop access using Apache Guacamole and xrdp.
+A Cockpit plugin that provides browser-based remote desktop access using
+Apache Guacamole and xrdp. Connects to local or remote RDP sessions
+directly through the Cockpit web interface without requiring a separate
+Guacamole server or WebSocket proxy.
 
 %prep
 %setup -q
 
-%install
-rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/%{_bindir}
-install %{name} $RPM_BUILD_ROOT/%{_bindir}
-mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}
-install %{name}rc $RPM_BUILD_ROOT/%{_sysconfdir}
+%build
+# Assets are pre-built; nothing to compile
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+%install
+mkdir -p %{buildroot}%{_datadir}/cockpit/%{name}
+cp -rp . %{buildroot}%{_datadir}/cockpit/%{name}/
 
 %files
-%{_bindir}/%{name}
-%{_sysconfdir}/%{name}rc
-%doc %{_mandir}/man1/%{name}.1.*
 %license LICENSE
+%{_datadir}/cockpit/%{name}/manifest.json
+%{_datadir}/cockpit/%{name}/index.html
+%{_datadir}/cockpit/%{name}/index.js
+%{_datadir}/cockpit/%{name}/index.css
+%dir %{_datadir}/cockpit/%{name}/fontawesome
+%dir %{_datadir}/cockpit/%{name}/fontawesome/webfonts
+%{_datadir}/cockpit/%{name}/fontawesome/webfonts/*.woff2
 
 %changelog
-* Sun Feb 22 2026 kenmoini
+* Sun Feb 22 2026 Ken Moini - 0.1.0-1
 - Initial release of cockpit-guacamole
