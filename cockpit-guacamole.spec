@@ -1,5 +1,5 @@
 Name:           cockpit-guacamole
-Version:        0.1.2
+Version:        0.1.3
 Release:        1%{?dist}
 Summary:        Cockpit plugin for browser-based remote desktop access
 

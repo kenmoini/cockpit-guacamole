@@ -54,6 +54,8 @@ var configAddGroups = document.getElementById('config-add-groups');
 var configGroupsStatus = document.getElementById('config-groups-status');
 var configMaxDisconnectTime = document.getElementById('config-max-disconnect-time');
 var configDisconnectStatus = document.getElementById('config-disconnect-status');
+var configXrdpPort = document.getElementById('config-xrdp-port');
+var configXrdpPortStatus = document.getElementById('config-xrdp-port-status');
 
 var client = null;
 var tunnel = null;
@@ -461,7 +463,7 @@ function setConfigStatus(el, type, text) {
 
 function clearAllConfigStatuses() {
     [configXrdpEnabledStatus, configGuacdEnabledStatus,
-     configGroupsStatus, configDisconnectStatus].forEach(function(el) {
+     configGroupsStatus, configDisconnectStatus, configXrdpPortStatus].forEach(function(el) {
         el.textContent = '';
         el.className = 'config-status';
     });
@@ -550,6 +552,64 @@ function updateMaxDisconnectionTime(iniContents, newValue) {
     return result.join('\n');
 }
 
+function parseXrdpPort(iniContents) {
+    var lines = iniContents.split('\n');
+    var inGlobals = false;
+
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].trim();
+
+        if (line.match(/^\[.*\]$/)) {
+            inGlobals = (line.toLowerCase() === '[globals]');
+            continue;
+        }
+
+        if (!inGlobals) continue;
+
+        var match = line.match(/^port\s*=\s*(.+)$/i);
+        if (match) {
+            var val = parseInt(match[1].trim(), 10);
+            return (val > 0 && val <= 65535) ? val : 3389;
+        }
+    }
+    return 3389;
+}
+
+function updateXrdpPort(iniContents, newPort) {
+    var lines = iniContents.split('\n');
+    var result = [];
+    var inGlobals = false;
+    var foundAndReplaced = false;
+
+    for (var i = 0; i < lines.length; i++) {
+        var trimmed = lines[i].trim();
+
+        if (trimmed.match(/^\[.*\]$/)) {
+            if (inGlobals && !foundAndReplaced) {
+                result.push('port=' + newPort);
+                foundAndReplaced = true;
+            }
+            inGlobals = (trimmed.toLowerCase() === '[globals]');
+            result.push(lines[i]);
+            continue;
+        }
+
+        if (inGlobals && trimmed.match(/^port\s*=/i)) {
+            result.push('port=' + newPort);
+            foundAndReplaced = true;
+            continue;
+        }
+
+        result.push(lines[i]);
+    }
+
+    if (inGlobals && !foundAndReplaced) {
+        result.push('port=' + newPort);
+    }
+
+    return result.join('\n');
+}
+
 function loadConfigState() {
     configureLoading.classList.remove('hidden');
     configureContent.classList.add('hidden');
@@ -580,6 +640,13 @@ function loadConfigState() {
     // 4. Read sesman.ini for MaxDisconnectionTime
     promises.push(
         cockpit.spawn(['cat', '/etc/xrdp/sesman.ini'])
+            .then(function(contents) { return contents; })
+            .catch(function() { return null; })
+    );
+
+    // 5. Read xrdp.ini for listening port
+    promises.push(
+        cockpit.spawn(['cat', '/etc/xrdp/xrdp.ini'])
             .then(function(contents) { return contents; })
             .catch(function() { return null; })
     );
@@ -628,6 +695,14 @@ function loadConfigState() {
             maxDisconnectTime = parseMaxDisconnectionTime(sesmanContents);
         }
         configMaxDisconnectTime.value = maxDisconnectTime;
+
+        var xrdpIniContents = results[4];
+        var xrdpPort = 3389;
+        if (xrdpIniContents) {
+            xrdpPort = parseXrdpPort(xrdpIniContents);
+        }
+        configXrdpPort.value = xrdpPort;
+        portInput.value = xrdpPort;
 
         configureLoading.classList.add('hidden');
         configureContent.classList.remove('hidden');
@@ -686,6 +761,27 @@ function applyConfiguration() {
             })
             .catch(function(err) {
                 setConfigStatus(configDisconnectStatus, 'err', 'Failed: ' + (err.message || err));
+                throw err;
+            })
+    );
+
+    // 4. XRDP listening port in xrdp.ini
+    var newPort = parseInt(configXrdpPort.value, 10);
+    if (isNaN(newPort) || newPort < 1 || newPort > 65535) newPort = 3389;
+
+    operations.push(
+        cockpit.spawn(['cat', '/etc/xrdp/xrdp.ini'], { err: 'message' })
+            .then(function(contents) {
+                var updated = updateXrdpPort(contents, newPort);
+                return cockpit.file('/etc/xrdp/xrdp.ini', { superuser: 'require' })
+                    .replace(updated);
+            })
+            .then(function() {
+                setConfigStatus(configXrdpPortStatus, 'ok', 'Done');
+                portInput.value = newPort;
+            })
+            .catch(function(err) {
+                setConfigStatus(configXrdpPortStatus, 'err', 'Failed: ' + (err.message || err));
                 throw err;
             })
     );
