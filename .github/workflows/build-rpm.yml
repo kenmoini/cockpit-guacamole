@@ -101,6 +101,11 @@ jobs:
     name: Create release with all assets
     needs: [build_tarball, build_rpm, build_deb]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
     steps:
       - name: Download cached rpm, deb, and tar.gz artifacts
         uses: actions/download-artifact@v7
