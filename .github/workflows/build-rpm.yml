@@ -39,7 +39,7 @@ jobs:
           tar -czvf ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}.tar.gz ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}
 
       - name: Upload source archive as artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}.tar.gz
           path: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}.tar.gz
@@ -70,7 +70,7 @@ jobs:
           rpmbuild -ba ${{ env.PACKAGE_NAME }}.spec
 
       - name: Upload .rpm package as artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.rpm
           path: ~/rpmbuild/RPMS/${{ env.ARCH }}/*.rpm
@@ -92,7 +92,7 @@ jobs:
           sudo alien -k --verbose --to-deb *.rpm
 
       - name: Upload .deb package as artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.deb
           path: ${{ env.PACKAGE_NAME }}*.deb
