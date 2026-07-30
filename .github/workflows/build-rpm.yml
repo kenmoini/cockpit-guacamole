@@ -17,12 +17,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.1.0
 
       - name: Use Node.js 22.x
         uses: actions/setup-node@v6.3.0
         with:
-          node-version: 22.x
+          node-version: 22.23.2
 
       - name: Build plugin
         run: |
@@ -39,7 +39,7 @@ jobs:
           tar -czvf ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}.tar.gz ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}
 
       - name: Upload source archive as artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v6.0.0
         with:
           name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}.tar.gz
           path: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}.tar.gz
@@ -50,10 +50,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.1.0
 
       - name: Download source archive
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v7.0.0
         with:
           name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}.tar.gz
 
@@ -70,7 +70,7 @@ jobs:
           rpmbuild -ba ${{ env.PACKAGE_NAME }}.spec
 
       - name: Upload .rpm package as artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v6.0.0
         with:
           name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.rpm
           path: ~/rpmbuild/RPMS/${{ env.ARCH }}/*.rpm
@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download .rpm artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v7.0.0
         id: download
         with:
           name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.rpm
@@ -92,7 +92,7 @@ jobs:
           sudo alien -k --verbose --to-deb *.rpm
 
       - name: Upload .deb package as artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v6.0.0
         with:
           name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}-1.${{ env.DIST }}.${{ env.ARCH }}.deb
           path: ${{ env.PACKAGE_NAME }}*.deb
@@ -108,10 +108,10 @@ jobs:
       id-token: write
     steps:
       - name: Download cached rpm, deb, and tar.gz artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v7.0.0
 
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.6.2
         with:
           files: |
             ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}.tar.gz/*.tar.gz
